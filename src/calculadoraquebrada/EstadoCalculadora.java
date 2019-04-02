@@ -6,109 +6,96 @@
 package calculadoraquebrada;
 
 import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.Stack;
+import java.util.HashSet;
+import java.util.Set;
+
 
 /**
  *
  * @author Marcos
  */
-public class EstadoCalculadora {
 
-    /**
-     * @param args the command line arguments
-     */
-    public static void main(String[] args) {
-        // TODO code application logic here
-    }
-    
-       // Atributo para representar os pinos do jogo.
-    private int pinos[];
+class EstadoCalculadora {
     
     private ArrayList<Integer> teclas;
-    private ArrayList<Integer> valoresAtuais;
+    private ArrayList<String> operadores;
     
-    // Numero de pinos no jogo
-    private static int NUM_PINOS = 3;
+    private int numeroOperacoes;
     
-    private int numDiscos;
+    private int numeroAlvo;
     
-    public EstadoCalculadora() {
-        this.valoresAtuais =  new ArrayList();
+    private Set<No> nivelAtual = new HashSet();
+    
+    private boolean buscando = true;
+    
+    public void preencheEstado () {
+        teclas.add(2);
+        teclas.add(4);
+        teclas.add(5);
+        operadores.add("+");
+        operadores.add("-");
+        
+        No no = new No(0);
+        nivelAtual.add(no);
     }
     
-    public void addTeclaFuncional (int tecla) {
-        this.teclas.add(tecla);
-    }
-    
-    public void adicionaNovoValor (int valor) {
-        this.valoresAtuais.add(valor);
-    }
-    
-    public boolean compararCom(int estadoFinal) {
-        /* apos gerar um nivel completo, comparo com o estadoFinal */
-        for(int i = 0; i < valoresAtuais.size(); ++i) {
-            if (valoresAtuais.get(i) == estadoFinal) {
-                return true;
-            } else {
-                return false;
+    public void iniciaBusca () {
+        Set<No> filhos;
+        int resultado = 0;
+        
+        while (buscando) {
+            filhos = new HashSet();
+            
+            //n³ dentro de um while. Complexidade > 99999999
+            for(No objeto : nivelAtual) {
+                for (int j = 0; j < teclas.size(); j++) {
+                    for (int k = 0; k < operadores.size(); k++) {
+                        switch (operadores.get(k)) {
+                            case "+":
+                                resultado = teclas.get(j) + objeto.getValor();
+                                break;
+                            case "-":
+                                resultado = teclas.get(j) + objeto.getValor();
+                                break;
+                            case "*":
+                                resultado = teclas.get(j) + objeto.getValor();
+                                break;
+                            case "/":
+                                resultado = teclas.get(j) + objeto.getValor();
+                                break;
+                        }
+                        if (resultado != numeroAlvo) {
+                            No result = new No (resultado);
+                        
+                            filhos.add(result);
+                        } else {
+                            buscando = false;
+                        }
+                    }
+                }
             }
-        }
-        return false;
-    }
-    
-    public void mostrarEstado() {
-        System.out.printf("Valores: ");
-        for(int i =0; i < valoresAtuais.size(); ++i) {
-            while(it.hasNext()) {
-                System.out.print(" "+it.next());
-            }
-            System.out.println();
-        }
-    }
-    
-    public EstadoHanoi clonar() {
-        EstadoHanoi clone = new EstadoHanoi(numDiscos);
-        for(int i = 0; i < NUM_PINOS; ++i) {
-            clone.pinos[i] = (Stack<Integer>) 
-                    pinos[i].clone();
-        } 
-        return clone;
-    }
-    
-    public static void main(String args[]) {
-        EstadoHanoi e = new EstadoHanoi(5);
-        
-        e.addDisco(0, 5);
-        e.addDisco(0, 4);
-        e.addDisco(0, 3);
-        e.addDisco(0, 2);
-        e.addDisco(0, 1);
-        
-        EstadoHanoi objetivo = new EstadoHanoi(5);
-        objetivo.addDisco(1, 5);
-        objetivo.addDisco(1, 4);
-        objetivo.addDisco(1, 3);
-        objetivo.addDisco(1, 2);
-        objetivo.addDisco(1, 1);
-        
-        No raiz = new No(e);
-        //No solucao = raiz.buscaLargura(objetivo);
-        No solucao = raiz.buscaProfundidade(objetivo, raiz);
-        
-        Stack<No> passos = new Stack();
-        while(solucao != null) {
-            passos.push(solucao);
-            solucao = solucao.getPai();
+            numeroOperacoes++;
+            
+            //Apago o nivel que estava salvo e seto o novo nivel como os atuais filhos que acabei de gerar
+            nivelAtual.addAll(filhos);
         }
         
-        System.out.println("Numero de açoes = "+passos.size());
-        int numPassos = passos.size();
-        for(int i = 0; i < numPassos; ++i) {
-            System.out.println("Passo "+(i+1));
-            passos.pop().getEstadoHanoi().mostrarEstado();
-        }
         
     }
-    
 }
+
+
+class No {
+    
+    private int valor;
+    private Set filhos;
+    
+    public No (int valor) {
+        this.valor = valor;
+        this.filhos = new HashSet();
+    }
+    
+    public int getValor() {
+        return this.valor;
+    }
+}  
